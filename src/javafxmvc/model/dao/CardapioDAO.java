@@ -111,7 +111,9 @@ public class CardapioDAO {
         return retorno;
     }
 
-    public Cardapio buscarUltimoCardapio() {
+
+    public Cardapio buscarUltimaCardapio() {
+
         String sql = "SELECT max(cdVenda) FROM vendas";
         Cardapio retorno = new Cardapio();
         try {
