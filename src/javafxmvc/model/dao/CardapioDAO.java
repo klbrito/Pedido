@@ -84,8 +84,8 @@ public class CardapioDAO {
                 cardapioItemDAO.setConnection(connection);
                 cardapioItem = cardapioItemDAO.listarPorVenda(cardapio);
 
-                cardapio.setItensDeVenda(itensDeVenda);
-                retorno.add(venda);
+                cardapio.setCardapioItem(cardapioItem);
+                retorno.add(cardapio);
             }
         } catch (SQLException ex) {
             Logger.getLogger(VendaDAO.class.getName()).log(Level.SEVERE, null, ex);
@@ -111,15 +111,15 @@ public class CardapioDAO {
         return retorno;
     }
 
-    public Venda buscarUltimaVenda() {
+    public Cardapio buscarUltimaCardapio() {
         String sql = "SELECT max(cdVenda) FROM vendas";
-        Venda retorno = new Venda();
+        Cardapio retorno = new Cardapio();
         try {
             PreparedStatement stmt = connection.prepareStatement(sql);
             ResultSet resultado = stmt.executeQuery();
 
             if (resultado.next()) {
-                retorno.setCdVenda(resultado.getInt("max"));
+                retorno.setId_cardapio(resultado.getInt("max"));
                 return retorno;
             }
         } catch (SQLException ex) {
