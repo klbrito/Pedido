@@ -1,4 +1,4 @@
-package javafxmvc.model.dao;
+package pedido.model.dao;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -11,10 +11,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafxmvc.model.domain.CardapioItem;
-import javafxmvc.model.domain.Cardapio;
+import pedido.model.domain.Cliente;
+import pedido.model.domain.ItemDeVenda;
+import pedido.model.domain.Venda;
 
-public class CardapioDAO {
+public class VendaDAO {
 
     private Connection connection;
 
@@ -26,66 +27,82 @@ public class CardapioDAO {
         this.connection = connection;
     }
 
-    public boolean inserir(Cardapio cardapio) {
-        String sql = "INSERT INTO cardapio(dt_cardapio) VALUES(?)";
+    public boolean inserir(Venda venda) {
+        String sql = "INSERT INTO vendas(data, valor, pago, cdCliente) VALUES(?,?,?,?)";
         try {
             PreparedStatement stmt = connection.prepareStatement(sql);
-            stmt.setDate(1, Date.valueOf(cardapio.getDt_cardapio()));
+            stmt.setDate(1, Date.valueOf(venda.getData()));
+            stmt.setDouble(2, venda.getValor());
+            stmt.setBoolean(3, venda.getPago());
+            stmt.setInt(4, venda.getCliente().getCdCliente());
             stmt.execute();
             return true;
         } catch (SQLException ex) {
-            Logger.getLogger(CardapioDAO.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(VendaDAO.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
     }
 
-    public boolean alterar(Cardapio cardapio) {
-        String sql = "UPDATE cardapio SET dt_cardapio WHERE id_cardapio=?";
+    public boolean alterar(Venda venda) {
+        String sql = "UPDATE clientes SET data=?, valor=?, pago=?, cdCliente=? WHERE cdVenda=?";
         try {
             PreparedStatement stmt = connection.prepareStatement(sql);
-            stmt.setDate(1, Date.valueOf(cardapio.getDt_cardapio()));
-            stmt.setDouble(2, cardapio.getId_cardapio());
+            stmt.setDate(1, Date.valueOf(venda.getData()));
+            stmt.setDouble(2, venda.getValor());
+            stmt.setBoolean(3, venda.getPago());
+            stmt.setInt(4, venda.getCliente().getCdCliente());
+            stmt.setInt(5, venda.getCdVenda());
             stmt.execute();
             return true;
         } catch (SQLException ex) {
-            Logger.getLogger(CardapioDAO.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(VendaDAO.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
     }
 
-    public boolean remover(Cardapio cardapio) {
-        String sql = "DELETE FROM cardapio WHERE id_cardapio=?";
+    public boolean remover(Venda venda) {
+        String sql = "DELETE FROM vendas WHERE cdVenda=?";
         try {
             PreparedStatement stmt = connection.prepareStatement(sql);
-            stmt.setInt(1, cardapio.getId_cardapio());
+            stmt.setInt(1, venda.getCdVenda());
             stmt.execute();
             return true;
         } catch (SQLException ex) {
-            Logger.getLogger(CardapioDAO.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(VendaDAO.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
     }
 
-    public List<Cardapio> listar() {
-        String sql = "SELECT * FROM cardapio";
-        List<Cardapio> retorno = new ArrayList<>();
+    public List<Venda> listar() {
+        String sql = "SELECT * FROM vendas";
+        List<Venda> retorno = new ArrayList<>();
         try {
             PreparedStatement stmt = connection.prepareStatement(sql);
             ResultSet resultado = stmt.executeQuery();
             while (resultado.next()) {
-                Cardapio cardapio = new Cardapio();
-                List<CardapioItem> cardapioItem = new ArrayList();
+                Venda venda = new Venda();
+                Cliente cliente = new Cliente();
+                List<ItemDeVenda> itensDeVenda = new ArrayList();
 
-                cardapio.setId_cardapio(resultado.getInt("id_cardapio"));
-                cardapio.setDt_cardapio(resultado.getDate("dt_cardapio").toLocalDate());
+                venda.setCdVenda(resultado.getInt("cdVenda"));
+                venda.setData(resultado.getDate("data").toLocalDate());
+                venda.setValor(resultado.getDouble("valor"));
+                venda.setPago(resultado.getBoolean("pago"));
+                cliente.setCdCliente(resultado.getInt("cdCliente"));
+
+                //Obtendo os dados completos do Cliente associado à Venda
+                ClienteDAO clienteDAO = new ClienteDAO();
+                clienteDAO.setConnection(connection);
+                cliente = clienteDAO.buscar(cliente);
 
                 //Obtendo os dados completos dos Itens de Venda associados à Venda
-                CardapioItemDAO cardapioItemDAO = new CardapioItemDAO();
-                cardapioItemDAO.setConnection(connection);
-                cardapioItem = cardapioItemDAO.listarPorVenda(cardapio);
+                ItemDeVendaDAO itemDeVendaDAO = new ItemDeVendaDAO();
+                itemDeVendaDAO.setConnection(connection);
+                itensDeVenda = itemDeVendaDAO.listarPorVenda(venda);
 
-                cardapio.setCardapioItem(cardapioItem);
-                retorno.add(cardapio);
+                venda.setCliente(cliente);
+                venda.setItensDeVenda(itensDeVenda);
+                retorno.add(venda);
             }
         } catch (SQLException ex) {
             Logger.getLogger(VendaDAO.class.getName()).log(Level.SEVERE, null, ex);
@@ -93,35 +110,38 @@ public class CardapioDAO {
         return retorno;
     }
 
-    public Cardapio buscar(Cardapio cardapio) {
-        String sql = "SELECT * FROM cardapio WHERE id_cardapio=?";
-        Cardapio retorno = new Cardapio();
+    public Venda buscar(Venda venda) {
+        String sql = "SELECT * FROM vendas WHERE cdVenda=?";
+        Venda retorno = new Venda();
         try {
             PreparedStatement stmt = connection.prepareStatement(sql);
-            stmt.setInt(1, cardapio.getId_cardapio());
+            stmt.setInt(1, venda.getCdVenda());
             ResultSet resultado = stmt.executeQuery();
             if (resultado.next()) {
-                cardapio.setId_cardapio(resultado.getInt("id_cardapio"));
-                cardapio.setDt_cardapio(resultado.getDate("dt_cardapio").toLocalDate());
-                retorno = cardapio;
+                Cliente cliente = new Cliente();
+                venda.setCdVenda(resultado.getInt("cdVenda"));
+                venda.setData(resultado.getDate("data").toLocalDate());
+                venda.setValor(resultado.getDouble("valor"));
+                venda.setPago(resultado.getBoolean("pago"));
+                cliente.setCdCliente(resultado.getInt("cdCliente"));
+                venda.setCliente(cliente);
+                retorno = venda;
             }
         } catch (SQLException ex) {
-            Logger.getLogger(CardapioDAO.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(VendaDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
         return retorno;
     }
 
-
-    public Cardapio buscarUltimaCardapio() {
-
+    public Venda buscarUltimaVenda() {
         String sql = "SELECT max(cdVenda) FROM vendas";
-        Cardapio retorno = new Cardapio();
+        Venda retorno = new Venda();
         try {
             PreparedStatement stmt = connection.prepareStatement(sql);
             ResultSet resultado = stmt.executeQuery();
 
             if (resultado.next()) {
-                retorno.setId_cardapio(resultado.getInt("max"));
+                retorno.setCdVenda(resultado.getInt("max"));
                 return retorno;
             }
         } catch (SQLException ex) {

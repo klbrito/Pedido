@@ -1,4 +1,4 @@
-package javafxmvc.model.database;
+package pedido.model.database;
 
 public class DatabaseFactory {
     public static Database getDatabase(String nome){

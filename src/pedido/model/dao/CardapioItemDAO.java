@@ -1,4 +1,4 @@
-package javafxmvc.model.dao;
+package pedido.model.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafxmvc.model.domain.CardapioItem;
-import javafxmvc.model.domain.Cardapio;
+import pedido.model.domain.CardapioItem;
+import pedido.model.domain.Cardapio;
 
 public class CardapioItemDAO {
 

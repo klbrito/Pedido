@@ -1,4 +1,4 @@
-package javafxmvc.model.domain;
+package pedido.model.domain;
 
 public class CardapioItem {
 

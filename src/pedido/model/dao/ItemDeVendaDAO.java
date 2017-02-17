@@ -1,4 +1,4 @@
-package javafxmvc.model.dao;
+package pedido.model.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,9 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafxmvc.model.domain.ItemDeVenda;
-import javafxmvc.model.domain.Produto;
-import javafxmvc.model.domain.Venda;
+import pedido.model.domain.ItemDeVenda;
+import pedido.model.domain.Produto;
+import pedido.model.domain.Venda;
 
 public class ItemDeVendaDAO {
 
